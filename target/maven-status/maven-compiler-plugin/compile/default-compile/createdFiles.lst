@@ -1,0 +1,8 @@
+com\example\homeautomation\device\Device.class
+com\example\homeautomation\device\DeviceRepository.class
+com\example\homeautomation\device\DeviceService.class
+com\example\homeautomation\HomeAutomationApplication.class
+com\example\homeautomation\device\DevicesController.class
+com\example\homeautomation\device\DeviceDataInitializer.class
+com\example\homeautomation\device\DeviceRequest.class
+com\example\homeautomation\device\DeviceController.class
