@@ -35,7 +35,25 @@ public class UserService {
             throw new IllegalArgumentException("Role is required");
         }
 
+        if (user.getPassword() == null || user.getPassword().isBlank()) {
+            throw new IllegalArgumentException("Password is required");
+        }
+
         return userDAO.create(user);
+    }
+
+    public User login(String email, String password) throws SQLException {
+        User user = userDAO.findByEmail(email);
+
+        if (user == null || !user.isActive()) {
+            return null;
+        }
+
+        if (!user.getPassword().equals(password)) {
+            return null;
+        }
+
+        return user;
     }
 
     public void setActive(Long id, boolean active) throws SQLException {

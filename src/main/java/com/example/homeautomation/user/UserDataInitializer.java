@@ -13,8 +13,8 @@ public class UserDataInitializer {
             userService.initialize();
 
             if (userService.findAll().isEmpty()) {
-                userService.create(new User("Raj", "raj@home.local", "HOMEOWNER"));
-                userService.create(new User("Admin", "admin@home.local", "ADMIN"));
+                userService.create(new User("Raj", "raj@home.local", "HOMEOWNER", "raj123"));
+                userService.create(new User("Admin", "admin@home.local", "ADMIN", "admin123"));
             }
         };
     }
