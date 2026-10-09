@@ -1,8 +1,19 @@
-E:\java_project\src\main\java\com\example\homeautomation\device\Device.java
-E:\java_project\src\main\java\com\example\homeautomation\device\DeviceController.java
-E:\java_project\src\main\java\com\example\homeautomation\device\DeviceDataInitializer.java
-E:\java_project\src\main\java\com\example\homeautomation\device\DeviceRepository.java
-E:\java_project\src\main\java\com\example\homeautomation\device\DeviceRequest.java
-E:\java_project\src\main\java\com\example\homeautomation\device\DevicesController.java
-E:\java_project\src\main\java\com\example\homeautomation\device\DeviceService.java
-E:\java_project\src\main\java\com\example\homeautomation\HomeAutomationApplication.java
+C:\Users\Dell\Desktop\Java NEW pr\java_home_automation\src\main\java\com\example\homeautomation\automation\AutomationRule.java
+C:\Users\Dell\Desktop\Java NEW pr\java_home_automation\src\main\java\com\example\homeautomation\automation\AutomationRuleController.java
+C:\Users\Dell\Desktop\Java NEW pr\java_home_automation\src\main\java\com\example\homeautomation\automation\AutomationRuleDAO.java
+C:\Users\Dell\Desktop\Java NEW pr\java_home_automation\src\main\java\com\example\homeautomation\automation\AutomationRuleDataInitializer.java
+C:\Users\Dell\Desktop\Java NEW pr\java_home_automation\src\main\java\com\example\homeautomation\automation\AutomationRuleService.java
+C:\Users\Dell\Desktop\Java NEW pr\java_home_automation\src\main\java\com\example\homeautomation\device\Device.java
+C:\Users\Dell\Desktop\Java NEW pr\java_home_automation\src\main\java\com\example\homeautomation\device\DeviceController.java
+C:\Users\Dell\Desktop\Java NEW pr\java_home_automation\src\main\java\com\example\homeautomation\device\DeviceDataInitializer.java
+C:\Users\Dell\Desktop\Java NEW pr\java_home_automation\src\main\java\com\example\homeautomation\device\DeviceRepository.java
+C:\Users\Dell\Desktop\Java NEW pr\java_home_automation\src\main\java\com\example\homeautomation\device\DeviceRequest.java
+C:\Users\Dell\Desktop\Java NEW pr\java_home_automation\src\main\java\com\example\homeautomation\device\DevicesController.java
+C:\Users\Dell\Desktop\Java NEW pr\java_home_automation\src\main\java\com\example\homeautomation\device\DeviceService.java
+C:\Users\Dell\Desktop\Java NEW pr\java_home_automation\src\main\java\com\example\homeautomation\HomeAutomationApplication.java
+C:\Users\Dell\Desktop\Java NEW pr\java_home_automation\src\main\java\com\example\homeautomation\jdbc\DBConnection.java
+C:\Users\Dell\Desktop\Java NEW pr\java_home_automation\src\main\java\com\example\homeautomation\user\User.java
+C:\Users\Dell\Desktop\Java NEW pr\java_home_automation\src\main\java\com\example\homeautomation\user\UserController.java
+C:\Users\Dell\Desktop\Java NEW pr\java_home_automation\src\main\java\com\example\homeautomation\user\UserDAO.java
+C:\Users\Dell\Desktop\Java NEW pr\java_home_automation\src\main\java\com\example\homeautomation\user\UserDataInitializer.java
+C:\Users\Dell\Desktop\Java NEW pr\java_home_automation\src\main\java\com\example\homeautomation\user\UserService.java
