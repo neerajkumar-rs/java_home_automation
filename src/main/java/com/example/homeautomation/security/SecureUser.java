@@ -249,7 +249,8 @@ public class SecureUser {
     }
     
     public boolean isAdmin() {
-        return hasRole("ROLE_ADMIN");
+        // Roles are stored without the ROLE_ prefix.
+        return hasRole("ADMIN");
     }
     
     @PreUpdate

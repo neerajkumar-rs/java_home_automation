@@ -45,6 +45,17 @@ public class User {
     @Column
     private String password;
 
+    @Column(name = "last_login")
+    private java.time.LocalDateTime lastLogin;
+
+    // Columns exist in the shared users table via security.SecureUser.
+    // Integer (nullable) so callers must be null-safe for pre-existing rows.
+    @Column(name = "failed_attempts")
+    private Integer failedAttempts;
+
+    @Column(name = "last_failed_login")
+    private java.time.LocalDateTime lastFailedLogin;
+
     public User(Long id, String name, String email, String role, boolean active) {
         this(id, name, email, role, active, null);
     }
@@ -125,15 +136,15 @@ public class User {
     }
     
     public boolean isAdmin() {
-        return "admin".equalsIgnoreCase(role) || "ROLE_ADMIN".equalsIgnoreCase(role);
+        return "ADMIN".equalsIgnoreCase(role);
     }
-    
+
     public void setAdmin(boolean admin) {
-        this.role = admin ? "ROLE_ADMIN" : "user";
+        this.role = admin ? "ADMIN" : "USER";
     }
-    
+
     public java.util.Set<String> getRoles() {
-        return java.util.Set.of(role != null ? role : "user");
+        return java.util.Set.of(role != null ? role : "USER");
     }
     
     public void addRole(String role) {
@@ -144,18 +155,34 @@ public class User {
     public void removeRole(String role) {
         // Simple implementation - clear if matches
         if (role.equals(this.role)) {
-            this.role = "user";
+            this.role = "USER";
         }
     }
-    
+
     public java.time.LocalDateTime getLastLogin() {
-        return null; // Old User doesn't track last login
+        return lastLogin;
     }
-    
+
     public void setLastLogin(java.time.LocalDateTime lastLogin) {
-        // Do nothing - old User doesn't track last login
+        this.lastLogin = lastLogin;
     }
-    
+
+    public Integer getFailedAttempts() {
+        return failedAttempts;
+    }
+
+    public void setFailedAttempts(Integer failedAttempts) {
+        this.failedAttempts = failedAttempts;
+    }
+
+    public java.time.LocalDateTime getLastFailedLogin() {
+        return lastFailedLogin;
+    }
+
+    public void setLastFailedLogin(java.time.LocalDateTime lastFailedLogin) {
+        this.lastFailedLogin = lastFailedLogin;
+    }
+
     public boolean isLocked() {
         return locked;
     }

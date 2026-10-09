@@ -20,7 +20,7 @@
             try {
                 const user = JSON.parse(userData || '{}');
                 // Check if user is not admin
-                if (!user.isAdmin && !user.roles?.includes('ROLE_ADMIN')) {
+                if (!user.isAdmin && !user.roles?.includes('ADMIN')) {
                     window.location.href = '/dashboard.html';
                     return;
                 }
