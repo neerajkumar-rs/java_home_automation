@@ -4,42 +4,55 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
 @Service
 public class JwtTokenService {
-    
-    @Value("${app.jwt.secret:home-automation-secret-key-that-should-be-at-least-32-characters-long}")
+
+    // No default: the secret must come from configuration (env var JWT_SECRET).
+    @Value("${app.jwt.secret:}")
     private String jwtSecret;
-    
-    @Value("${app.jwt.expiration:86400000}") // 24 hours in milliseconds
-    private long jwtExpirationMs;
-    
-    private SecretKey getSigningKey() {
-        byte[] keyBytes = jwtSecret.getBytes();
-        return Keys.hmacShaKeyFor(keyBytes);
+
+    // Minutes, per app.jwt.expiration-minutes (default 60).
+    @Value("${app.jwt.expiration-minutes:60}")
+    private long jwtExpirationMinutes;
+
+    @PostConstruct
+    void validateConfiguration() {
+        if (jwtSecret == null || jwtSecret.getBytes(StandardCharsets.UTF_8).length < 32) {
+            throw new IllegalStateException(
+                "app.jwt.secret is missing or too short: HS256 requires at least 32 bytes. " +
+                "Set the JWT_SECRET environment variable to a random value of 32+ characters.");
+        }
     }
-    
+
+    private SecretKey getSigningKey() {
+        return Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
+    }
+
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
     }
-    
+
     public Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
     }
-    
+
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims);
     }
-    
+
     private Claims extractAllClaims(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(getSigningKey())
@@ -47,37 +60,36 @@ public class JwtTokenService {
                 .parseClaimsJws(token)
                 .getBody();
     }
-    
+
     private Boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());
     }
-    
+
     public String generateToken(User user) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("id", user.getId());
         claims.put("email", user.getEmail());
-        // For old User class, use getName() as both firstName and username
         String name = user.getName() != null ? user.getName() : "User";
         claims.put("firstName", name);
-        claims.put("lastName", ""); // Old User doesn't have lastName
-        // Check if admin based on role
-        boolean isAdmin = "admin".equalsIgnoreCase(user.getRole()) || 
-                         "ROLE_ADMIN".equalsIgnoreCase(user.getRole());
-        claims.put("isAdmin", isAdmin);
-        claims.put("roles", user.getRole());
-        return createToken(claims, user.getEmail()); // Use email as subject
+        claims.put("lastName", "");
+        claims.put("isAdmin", user.isAdmin());
+        // Role convention: stored and propagated WITHOUT the ROLE_ prefix;
+        // the authentication filter adds ROLE_ exactly once.
+        claims.put("roles", List.of(user.getRole() != null ? user.getRole() : "USER"));
+        return createToken(claims, user.getEmail()); // email is the subject
     }
-    
+
     private String createToken(Map<String, Object> claims, String subject) {
+        long now = System.currentTimeMillis();
         return Jwts.builder()
                 .setClaims(claims)
                 .setSubject(subject)
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationMs))
+                .setIssuedAt(new Date(now))
+                .setExpiration(new Date(now + jwtExpirationMinutes * 60_000L))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
-    
+
     public Boolean validateToken(String token) {
         try {
             return !isTokenExpired(token);
@@ -85,7 +97,7 @@ public class JwtTokenService {
             return false;
         }
     }
-    
+
     public Boolean validateToken(String token, User user) {
         final String username = extractUsername(token);
         return (username.equals(user.getEmail()) && !isTokenExpired(token));

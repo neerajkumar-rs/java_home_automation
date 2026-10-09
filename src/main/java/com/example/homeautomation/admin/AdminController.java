@@ -1,24 +1,59 @@
 package com.example.homeautomation.admin;
 
+import com.example.homeautomation.security.SecureDevice;
+import com.example.homeautomation.security.SecureDeviceRepository;
 import com.example.homeautomation.user.User;
 import com.example.homeautomation.user.UserRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/admin")
 public class AdminController {
     
     private final UserRepository userRepository;
-    
-    public AdminController(UserRepository userRepository) {
+    private final SecureDeviceRepository secureDeviceRepository;
+
+    public AdminController(UserRepository userRepository, SecureDeviceRepository secureDeviceRepository) {
         this.userRepository = userRepository;
+        this.secureDeviceRepository = secureDeviceRepository;
     }
-    
+
+    /**
+     * The ONLY place that can see every device regardless of owner.
+     * Returns a DTO, not the entity, and runs readOnly so the LAZY owner
+     * association can be resolved without LazyInitializationException.
+     */
+    @GetMapping("/devices")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Transactional(readOnly = true)
+    public ResponseEntity<List<Map<String, Object>>> getAllDevices() {
+        List<Map<String, Object>> devices = secureDeviceRepository.findAll().stream()
+                .map(this::toDeviceView)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(devices);
+    }
+
+    private Map<String, Object> toDeviceView(SecureDevice d) {
+        Map<String, Object> view = new java.util.HashMap<>();
+        view.put("id", d.getId());
+        view.put("deviceUid", d.getDeviceUid());
+        view.put("name", d.getName());
+        view.put("type", d.getType());
+        view.put("room", d.getRoom());
+        view.put("state", d.getState());
+        view.put("value", d.getValue());
+        view.put("active", d.isActive());
+        view.put("ownerEmail", d.getOwnerEmail());
+        return view;
+    }
+
     @GetMapping("/users")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<User>> getAllUsers() {
@@ -69,16 +104,10 @@ public class AdminController {
                         existingUser.setEmail(user.getEmail());
                         existingUser.setFirstName(user.getFirstName());
                         existingUser.setLastName(user.getLastName());
+                        // Role stored without prefix; setAdmin assigns ADMIN or USER.
                         existingUser.setAdmin(user.isAdmin());
                         existingUser.setActive(user.isActive());
-                        
-                        // Update roles
-                        if (user.isAdmin()) {
-                            existingUser.addRole("ADMIN");
-                        } else {
-                            existingUser.removeRole("ADMIN");
-                        }
-                        
+
                         User updatedUser = userRepository.save(existingUser);
                         return ResponseEntity.ok(updatedUser);
                     })

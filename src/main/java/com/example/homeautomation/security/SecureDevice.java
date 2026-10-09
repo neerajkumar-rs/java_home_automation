@@ -51,7 +51,6 @@ public class SecureDevice {
     private String room;
     
     @NotBlank(message = "State is required")
-    @Size(max = 3, message = "State must be less than 4 characters")
     @Column(nullable = false)
     private String state = "OFF";
     

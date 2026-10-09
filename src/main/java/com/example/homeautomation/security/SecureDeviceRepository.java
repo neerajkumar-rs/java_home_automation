@@ -21,6 +21,11 @@ public interface SecureDeviceRepository extends JpaRepository<SecureDevice, Long
     @Query("SELECT d FROM SecureDevice d WHERE d.id = :deviceId AND d.owner.email = :ownerEmail")
     Optional<SecureDevice> findByIdAndOwnerEmail(@Param("deviceId") Long deviceId, 
                                                  @Param("ownerEmail") String ownerEmail);
+
+    // Duplicate-name check scoped to one owner (case-insensitive)
+    @Query("SELECT COUNT(d) > 0 FROM SecureDevice d WHERE d.owner.email = :ownerEmail AND LOWER(d.name) = LOWER(:name)")
+    boolean existsByOwnerEmailAndNameIgnoreCase(@Param("ownerEmail") String ownerEmail,
+                                                @Param("name") String name);
     
     // Find device by UID only if owned by user
     @Query("SELECT d FROM SecureDevice d WHERE d.deviceUid = :deviceUid AND d.owner.email = :ownerEmail")
