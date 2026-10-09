@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Like Button Example</title>
+    <style>
+        .like-button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px;
+        }
+        
+        .like-button:hover {
+            background-color: #2980b9;
+        }
+        
+        .like-button.liked {
+            background-color: #e74c3c;
+        }
+        
+        .like-count {
+            font-weight: bold;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Like Button Example</h1>
+    
+    <div>
+        <button class="like-button" onclick="toggleLike(1)">
+            <span id="like-text">Like</span>
+            <span class="like-count" id="like-count-1">0</span>
+        </button>
+    </div>
+    
+    <script>
+        let liked = false;
+        let likeCount = 0;
+        
+        async function toggleLike(deviceId) {
+            const button = document.querySelector('.like-button');
+            const likeText = document.getElementById('like-text');
+            const likeCountSpan = document.getElementById('like-count-' + deviceId);
+            
+            try {
+                if (!liked) {
+                    // Add like
+                    const response = await fetch(`/api/like/${deviceId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        liked = true;
+                        likeCount = data.likes;
+                        likeText.textContent = 'Unlike';
+                        button.classList.add('liked');
+                        likeCountSpan.textContent = likeCount;
+                    }
+                } else {
+                    // Remove like
+                    const response = await fetch(`/api/like/${deviceId}`, {
+                        method: 'DELETE'
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        liked = false;
+                        likeCount = data.likes;
+                        likeText.textContent = 'Like';
+                        button.classList.remove('liked');
+                        likeCountSpan.textContent = likeCount;
+                    }
+                }
+            } catch (error) {
+                console.error('Error with like:', error);
+                alert('Error: ' + error.message);
+            }
+        }
+        
+        // Get initial like count
+        async function getLikeCount(deviceId) {
+            try {
+                const response = await fetch(`/api/like/${deviceId}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('like-count-' + deviceId).textContent = data.likes;
+                }
+            } catch (error) {
+                console.error('Error getting like count:', error);
+            }
+        }
+        
+        // Initialize
+        getLikeCount(1);
+    </script>
+</body>
+</html>

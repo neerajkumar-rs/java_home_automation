@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Authentication</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .test-result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .info {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .login-test {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .login-test input {
+            padding: 8px;
+            margin: 5px 0;
+        }
+        code {
+            background-color: #f4f4f4;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <h1>Authentication Test</h1>
+    
+    <div class="test-section">
+        <h2>Current Login Status</h2>
+        <div id="currentStatus"></div>
+        <button onclick="checkStatus()">Check Status</button>
+        <button onclick="clearStorage()">Clear Storage</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test Login</h2>
+        <div class="login-test">
+            <div>
+                <label>Username: </label>
+                <input type="text" id="username" value="admin">
+            </div>
+            <div>
+                <label>Password: </label>
+                <input type="password" id="password" value="admin123">
+            </div>
+            <div>
+                <button onclick="testAdminLogin()">Login as Admin</button>
+                <button onclick="testUserLogin()">Login as User</button>
+            </div>
+        </div>
+        <div id="loginResult"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test Redirects</h2>
+        <button onclick="testIndexRedirect()">Test Home Redirect</button>
+        <button onclick="testDashboardRedirect()">Test Dashboard Redirect</button>
+        <button onclick="testAdminRedirect()">Test Admin Dashboard Redirect</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>API Endpoints</h2>
+        <button onclick="testAuthValidate()">Test /api/auth/validate</button>
+        <button onclick="testAuthLogin()">Test /api/auth/login</button>
+        <div id="apiResult"></div>
+    </div>
+    
+    <script>
+        function showResult(elementId, message, type) {
+            const element = document.getElementById(elementId);
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `test-result ${type}`;
+            resultDiv.textContent = message;
+            element.appendChild(resultDiv);
+            
+            // Clear after 5 seconds
+            setTimeout(() => {
+                resultDiv.remove();
+            }, 5000);
+        }
+        
+        function checkStatus() {
+            const token = localStorage.getItem('token');
+            const user = localStorage.getItem('user');
+            
+            const statusDiv = document.getElementById('currentStatus');
+            statusDiv.innerHTML = '';
+            
+            const tokenResult = document.createElement('div');
+            tokenResult.className = token ? 'test-result success' : 'test-result error';
+            tokenResult.textContent = token ? 
+                `✓ Token: ${token.substring(0, 20)}...` : 
+                '✗ No token found';
+            statusDiv.appendChild(tokenResult);
+            
+            const userResult = document.createElement('div');
+            userResult.className = user ? 'test-result success' : 'test-result error';
+            userResult.textContent = user ? 
+                `✓ User: ${JSON.parse(user).username}` : 
+                '✗ No user data found';
+            statusDiv.appendChild(userResult);
+            
+            if (user) {
+                const userObj = JSON.parse(user);
+                const userInfo = document.createElement('div');
+                userInfo.className = 'test-result info';
+                userInfo.textContent = `User: ${userObj.username}, Email: ${userObj.email}, Admin: ${userObj.isAdmin}`;
+                statusDiv.appendChild(userInfo);
+            }
+        }
+        
+        function clearStorage() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            showResult('currentStatus', 'Storage cleared', 'info');
+            checkStatus();
+        }
+        
+        async function testAuthLogin() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showResult('apiResult', `✓ Login successful! Token received: ${data.token.substring(0, 20)}...`, 'success');
+                    
+                    // Store the token and user data
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('user', JSON.stringify({
+                        id: data.id,
+                        username: data.username,
+                        email: data.email,
+                        firstName: data.firstName,
+                        lastName: data.lastName,
+                        isAdmin: data.admin,
+                        roles: data.roles
+                    }));
+                    
+                    checkStatus();
+                } else {
+                    showResult('apiResult', `✗ Login failed: ${data.error || 'Unknown error'}`, 'error');
+                }
+            } catch (error) {
+                showResult('apiResult', `✗ Network error: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testAuthValidate() {
+            const token = localStorage.getItem('token');
+            
+            if (!token) {
+                showResult('apiResult', '✗ No token to validate', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/auth/validate', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.valid) {
+                    showResult('apiResult', '✓ Token is valid', 'success');
+                } else {
+                    showResult('apiResult', `✗ Token invalid: ${data.message || 'Invalid token'}`, 'error');
+                }
+            } catch (error) {
+                showResult('apiResult', `✗ Validation error: ${error.message}`, 'error');
+            }
+        }
+        
+        function testAdminLogin() {
+            document.getElementById('username').value = 'admin';
+            document.getElementById('password').value = 'admin123';
+            testAuthLogin();
+        }
+        
+        function testUserLogin() {
+            document.getElementById('username').value = 'user';
+            document.getElementById('password').value = 'user123';
+            testAuthLogin();
+        }
+        
+        function testIndexRedirect() {
+            window.location.href = '/';
+        }
+        
+        function testDashboardRedirect() {
+            window.location.href = '/dashboard.html';
+        }
+        
+        function testAdminRedirect() {
+            window.location.href = '/admin.html';
+        }
+        
+        // Initial status check
+        checkStatus();
+    </script>
+</body>
+</html>

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Login Redirect</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        .test-result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Test Login Redirect</h1>
+    
+    <div id="testResults"></div>
+    
+    <button onclick="testRedirect()">Test Redirect to Login</button>
+    <button onclick="testAuthCheck()">Test Authentication Check</button>
+    
+    <script>
+        function testRedirect() {
+            // Clear any existing tokens
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            
+            // Test redirect
+            window.location.href = '/';
+        }
+        
+        function testAuthCheck() {
+            const token = localStorage.getItem('token');
+            const user = localStorage.getItem('user');
+            
+            const results = document.getElementById('testResults');
+            results.innerHTML = '';
+            
+            const tokenResult = document.createElement('div');
+            tokenResult.className = token ? 'test-result success' : 'test-result error';
+            tokenResult.textContent = token ? 
+                '✓ Token found in localStorage' : 
+                '✗ No token found in localStorage';
+            results.appendChild(tokenResult);
+            
+            const userResult = document.createElement('div');
+            userResult.className = user ? 'test-result success' : 'test-result error';
+            userResult.textContent = user ? 
+                '✓ User data found in localStorage' : 
+                '✗ No user data found in localStorage';
+            results.appendChild(userResult);
+            
+            if (token && user) {
+                const redirectResult = document.createElement('div');
+                redirectResult.className = 'test-result';
+                redirectResult.textContent = 'User is logged in. Would redirect to dashboard.';
+                results.appendChild(redirectResult);
+            }
+        }
+        
+        // Test on load
+        window.onload = testAuthCheck;
+    </script>
+</body>
+</html>

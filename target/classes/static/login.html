@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Home Automation</title>
+    <link rel="stylesheet" href="/styles.css?v=login-1">
+    <style>
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f5f5f5;
+        }
+        
+        .login-box {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 400px;
+            margin: 20px auto;
+        }
+        
+        @media screen and (max-width: 500px) {
+            .login-box {
+                padding: 20px;
+            }
+            .login-header h1 {
+                font-size: 24px;
+            }
+        }
+        
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .login-header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 28px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+        
+        .login-header p {
+            color: #7f8c8d;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #2c3e50;
+            font-weight: bold;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+        
+        .btn-login {
+            width: 100%;
+            padding: 12px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .btn-login:hover {
+            background-color: #2980b9;
+        }
+        
+        .btn-login:disabled {
+            background-color: #7f8c8d;
+            cursor: not-allowed;
+        }
+        
+        .error-message {
+            background-color: #ffeaea;
+            color: #c0392b;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .error-message.show {
+            display: block;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .register-link {
+            text-align: center;
+            margin-top: 20px;
+            color: #7f8c8d;
+        }
+        
+        .register-link a {
+            color: #3498db;
+            text-decoration: none;
+        }
+        
+        .register-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-box">
+            <div class="login-header">
+                <h1>Home Automation</h1>
+                <p>Sign in to control your devices</p>
+            </div>
+            
+            <div id="errorMessage" class="error-message"></div>
+            
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" class="form-input" placeholder="Enter your username" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" class="form-input" placeholder="Enter your password" required>
+                </div>
+                
+                <button type="submit" class="btn-login" id="loginButton">
+                    <span id="buttonText">Sign In</span>
+                    <span id="loadingSpinner" class="loading" style="display: none;"></span>
+                </button>
+            </form>
+            
+            <div class="register-link">
+                <p>Don't have an account? <a href="register.html">Register here</a></p>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const button = document.getElementById('loginButton');
+            const buttonText = document.getElementById('buttonText');
+            const spinner = document.getElementById('loadingSpinner');
+            const errorMessage = document.getElementById('errorMessage');
+            
+            // Clear previous error
+            errorMessage.classList.remove('show');
+            errorMessage.textContent = '';
+            
+            // Show loading state
+            button.disabled = true;
+            buttonText.textContent = 'Signing in...';
+            spinner.style.display = 'inline-block';
+            
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    // Save token to local storage
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('user', JSON.stringify({
+                        id: data.id,
+                        username: data.username,
+                        email: data.email,
+                        firstName: data.firstName,
+                        lastName: data.lastName,
+                        isAdmin: data.isAdmin,
+                        roles: data.roles
+                    }));
+                    
+                    // Redirect to appropriate dashboard
+                    if (data.isAdmin || data.roles?.includes('ROLE_ADMIN')) {
+                        window.location.href = '/admin.html';
+                    } else {
+                        window.location.href = '/dashboard.html';
+                    }
+                } else {
+                    // Show error with more details
+                    const errorMsg = data.error || data.message || 'Login failed. Please try again.';
+                    console.error('Login failed:', data);
+                    errorMessage.textContent = `Error: ${errorMsg} (Status: ${response.status})`;
+                    errorMessage.classList.add('show');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                errorMessage.textContent = `Network error: ${error.message}`;
+                errorMessage.classList.add('show');
+            } finally {
+                // Reset button state
+                button.disabled = false;
+                buttonText.textContent = 'Sign In';
+                spinner.style.display = 'none';
+            }
+        });
+        
+        // Check if already logged in
+        const token = localStorage.getItem('token');
+        if (token) {
+            // Validate token
+            fetch('/api/auth/validate', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.valid) {
+                    // Redirect based on user role
+                    const user = JSON.parse(localStorage.getItem('user'));
+                    if (user && user.isAdmin) {
+                        window.location.href = '/admin.html';
+                    } else {
+                        window.location.href = '/dashboard.html';
+                    }
+                } else {
+                    // Clear invalid token
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+                }
+            })
+            .catch(() => {
+                // Clear invalid token on error
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+            });
+        }
+    </script>
+</body>
+</html>

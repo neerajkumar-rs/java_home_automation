@@ -3,9 +3,38 @@ const { createRoot } = ReactDOM;
 
 const api = async (url, options = {}) => {
     const response = await fetch(url, options);
-    const result = response.status === 204 ? null : await response.json();
-    if (!response.ok) throw new Error(result?.message || 'The request could not be completed');
-    return result;
+    
+    // Handle 204 No Content
+    if (response.status === 204) {
+        return null;
+    }
+    
+    // Check content type
+    const contentType = response.headers.get('content-type');
+    
+    if (!contentType || !contentType.includes('application/json')) {
+        // If not JSON, check if we got an error response
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        // Return text if not JSON
+        const text = await response.text();
+        return text || null;
+    }
+    
+    try {
+        const result = await response.json();
+        if (!response.ok) {
+            throw new Error(result?.message || `HTTP ${response.status}: ${response.statusText}`);
+        }
+        return result;
+    } catch (jsonError) {
+        // If JSON parsing fails but response was OK, return empty
+        if (response.ok) {
+            return null;
+        }
+        throw new Error(`Failed to parse JSON: ${jsonError.message}`);
+    }
 };
 
 const clampValue = value => Math.max(0, Math.min(100, value));

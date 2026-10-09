@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Login</title>
+    <style>
+        body { font-family: Arial; padding: 20px; }
+        .test { margin: 10px 0; padding: 10px; border: 1px solid #ddd; }
+        .success { background-color: #d4edda; }
+        .error { background-color: #f8d7da; }
+        .response { background-color: #f8f9fa; padding: 10px; font-family: monospace; white-space: pre-wrap; }
+    </style>
+</head>
+<body>
+    <h1>Debug Login Test</h1>
+    
+    <div class="test">
+        <h3>Test Admin Login</h3>
+        <button onclick="testLogin('admin', 'admin123')">Test admin/admin123</button>
+        <button onclick="testLogin('admin', 'password')">Test admin/password</button>
+        <button onclick="testLogin('admin', 'admin')">Test admin/admin</button>
+    </div>
+    
+    <div class="test">
+        <h3>Test User Login</h3>
+        <button onclick="testLogin('user', 'user123')">Test user/user123</button>
+        <button onclick="testLogin('user', 'password')">Test user/password</button>
+        <button onclick="testLogin('user', 'user')">Test user/user</button>
+    </div>
+    
+    <div id="result" class="response"></div>
+    
+    <script>
+        async function testLogin(username, password) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = 'Testing...';
+            
+            try {
+                console.log(`Testing: ${username}/${password}`);
+                
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                const responseText = await response.text();
+                let data;
+                try {
+                    data = JSON.parse(responseText);
+                } catch (e) {
+                    data = { raw: responseText };
+                }
+                
+                let html = `<h3>Result for ${username}/${password}</h3>`;
+                html += `<p>Status: ${response.status} ${response.statusText}</p>`;
+                html += `<div class="response">${JSON.stringify(data, null, 2)}</div>`;
+                
+                if (response.ok) {
+                    html += `<p class="success">✓ SUCCESS - Login worked!</p>`;
+                    html += `<p>Token: ${data.token ? data.token.substring(0, 20) + '...' : 'No token'}</p>`;
+                    html += `<p>isAdmin: ${data.isAdmin}</p>`;
+                    html += `<p>roles: ${data.roles ? JSON.stringify(data.roles) : 'No roles'}</p>`;
+                } else {
+                    html += `<p class="error">✗ FAILED - Login failed</p>`;
+                }
+                
+                resultDiv.innerHTML = html;
+                
+            } catch (error) {
+                resultDiv.innerHTML = `<p class="error">Error: ${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>
