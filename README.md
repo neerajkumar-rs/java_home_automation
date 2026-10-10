@@ -1,83 +1,51 @@
-# Home Automation System 🏠
+# Home Automation System
 
-A secure home automation system built with Spring Boot and SQLite.
+A secure home-automation app with a Spring Boot backend, SQLite database, and a dark-neon developer-dashboard frontend (plain HTML/CSS/vanilla JS).
 
-## 🚀 Current Status: RUNNING SUCCESSFULLY
+## Features
+- JWT auth with role-based access (admin vs user)
+- Per-user data isolation — a user only ever sees their own devices
+- Add / toggle / delete devices, recent activity log, automation rules
+- Responsive dark dashboard UI (stats, room filters, device tiles, activity terminal)
 
-✅ **Application now starts successfully on port 8081**  
-✅ **All compilation errors fixed**  
-✅ **Database issues resolved**  
-✅ **Login pages accessible with perfect alignment**
+## Tech
+Spring Boot 3.5.5 · Java 17+ · SQLite · Maven · vanilla JS (no frameworks)
 
 ## Quick Start
-
-### 1. Start the Application:
 ```bash
-# Option A: Use the provided script
-scripts/start-app-8081.bat
+# Build + run on port 8081 (script sets JWT_SECRET automatically)
+scripts\start-app-8081.bat
+```
+Then open **http://localhost:8081** → you'll be sent to the login page.
 
-# Option B: Run manually
-mvn package -DskipTests
-java -jar target/home-automation-0.0.1-SNAPSHOT.jar --server.port=8081
+Or run manually:
+```bash
+mvn clean package -DskipTests
+java -jar target/home-automation-0.0.1-SNAPSHOT.jar --server.port=8081 --spring.profiles.active=local
+```
+> JWT: the app needs a secret of 32+ chars. The start script reads/creates a git-ignored `.env` with `JWT_SECRET`. A `local` profile also supplies a dev-only secret via `application-local.properties` (also git-ignored). Never commit a real secret.
+
+## Using the app
+- **Register** an account at `/register.html`, then **sign in** at `/login.html`.
+- Non-admin → `dashboard.html` (your devices). Admin → `admin.html` (users + all devices).
+- To seed an admin on first run, set `APP_ADMIN_EMAIL` and `APP_ADMIN_PASSWORD` env vars before starting (only applies when the users table is empty).
+
+## Project structure
+```
+src/main/java/com/example/homeautomation/
+├── user/        # auth, JWT, users
+├── device/      # devices, logs
+├── security/    # secure entities, repos, services
+├── admin/       # admin endpoints
+└── config/      # security/web config
+src/main/resources/static/
+├── login.html / register.html / index.html
+├── dashboard.html / admin.html      # user + admin UIs
+├── theme.css                        # shared dark-neon design system
+└── js/ (auth.js, ui.js, dashboard.js, admin.js)
 ```
 
-### 2. Access the Application:
-- **Admin Login**: http://localhost:8081/admin-login.html
-- **User Login**: http://localhost:8081/user-login.html
-- **Dashboard**: http://localhost:8081/dashboard.html
-- **Admin Panel**: http://localhost:8081/admin.html
-
-## ✅ Fixed Issues
-
-### 1. Login Prompt Issues ✅
-- Added professional admin login page (`admin-login.html`)
-- Added modern user login page (`user-login.html`)
-- Perfect text alignment implemented
-
-### 2. Compilation Errors ✅
-- Fixed all 41 Java source files
-- Added missing methods to `User.java`
-- Fixed JPA entity relationships
-- Resolved database schema conflicts
-
-### 3. Application Startup Issues ✅
-- Fixed SQLite constraint errors
-- Resolved table naming conflicts
-- Fixed Hibernate/JPA configuration
-- Port configuration working correctly
-
-## 📁 Project Structure
-
-```
-home-automation/
-├── src/main/java/com/example/homeautomation/
-│   ├── user/                    # User management
-│   ├── device/                  # Device management  
-│   ├── security/                # Security components
-│   └── config/                  # Configuration
-└── src/main/resources/static/
-    ├── admin-login.html          # Professional admin login
-    ├── user-login.html           # Modern user login
-    ├── dashboard.html           # Main dashboard
-    ├── admin.html               # Admin dashboard
-    └── styles.css               # Styles
-```
-
-## 🔧 Technical Details
-
-- **Spring Boot**: 3.5.5
-- **Java**: 17+
-- **Database**: SQLite
-- **Build Tool**: Maven
-- **Ports**: Admin (8081), User (8080)
-
-## 📋 Verification
-
-To verify the application is working:
-1. Run `scripts/test-running-app.bat`
-2. Open browser to `http://localhost:8081/admin-login.html`
-3. You should see a professional login interface
-
-## 📄 Documentation
-
-See [VERIFICATION_GUIDE.md](VERIFICATION_GUIDE.md) for detailed verification steps.
+## Troubleshooting
+- **Port in use:** `scripts\stop-app.bat`
+- **Build fails:** `mvn clean package -DskipTests`
+- **401 on pages/css:** hard-refresh; static assets are permitted in `SecurityConfig`.
