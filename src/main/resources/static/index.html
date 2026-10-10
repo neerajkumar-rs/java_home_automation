@@ -4,7 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home Automation Control</title>
-    <link rel="stylesheet" href="/styles.css?v=speedometer-2">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/theme.css">
     <script>
         // Check if user is already logged in
         function checkAuth() {
@@ -41,15 +44,15 @@
                 window.location.href = '/login.html';
             }
         }
-        
+
         // Run auth check
         window.onload = checkAuth;
     </script>
 </head>
 <body>
-    <div style="text-align: center; margin-top: 100px;">
-        <h2>Loading Home Automation...</h2>
-        <p>Checking authentication status...</p>
+    <div class="splash">
+        <div class="splash-title">HOME<span style="color:var(--cyan)">//</span>AUTO</div>
+        <div class="splash-sub"><span class="cursor">&gt; checking authentication status</span></div>
     </div>
 </body>
 </html>

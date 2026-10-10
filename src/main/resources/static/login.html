@@ -4,37 +4,46 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign in - Home Automation</title>
-    <link rel="stylesheet" href="/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/theme.css">
 </head>
-<body class="center-page">
-    <main class="card auth-card">
-        <h1 class="card-title">Home Automation</h1>
-        <p class="card-subtitle">Sign in to control your devices</p>
+<body>
+    <div class="auth-wrap">
+        <main class="auth-card">
+            <div class="auth-inner">
+                <h1 class="auth-title"><span class="prompt">&gt;</span> sign in</h1>
+                <p class="auth-sub">// home automation console access</p>
 
-        <form id="loginForm">
-            <div class="form-group">
-                <label for="username">Username</label>
-                <input type="text" id="username" autocomplete="username" required>
-            </div>
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" autocomplete="current-password" required>
-            </div>
-            <p id="error" class="alert error hidden"></p>
-            <button type="submit" id="loginBtn" class="btn primary full">Sign in</button>
-        </form>
+                <div id="error" class="error-box hidden" role="alert"></div>
 
-        <p class="muted center">No account? <a href="/register.html">Register</a></p>
-    </main>
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input type="text" id="username" autocomplete="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" autocomplete="current-password" required>
+                    </div>
+                    <button type="submit" id="loginBtn" class="btn primary full">Sign in</button>
+                </form>
+
+                <p class="auth-foot">No account? <a href="/register.html">Register</a></p>
+            </div>
+        </main>
+    </div>
 
     <script src="/js/auth.js"></script>
+    <script src="/js/ui.js"></script>
     <script>
         const form = document.getElementById('loginForm');
         const errorEl = document.getElementById('error');
         const btn = document.getElementById('loginBtn');
 
         function showError(msg) {
-            errorEl.textContent = msg;
+            errorEl.textContent = '> error: ' + msg;
             errorEl.classList.remove('hidden');
         }
 
