@@ -4,115 +4,126 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - Home Automation</title>
-    <link rel="stylesheet" href="/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/theme.css">
 </head>
 <body>
-    <header class="topbar">
-        <span class="topbar-title">Admin Console</span>
-        <button id="logoutBtn" class="btn small">Log out</button>
-    </header>
+    <div class="app-shell">
 
-    <main class="container">
-        <p id="alert" class="alert error hidden"></p>
+        <!-- ============ SIDEBAR ============ -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-logo">
+                HOME<span class="logo-slash">//</span>AUTO
+                <span class="badge-role">ADMIN</span>
+            </div>
 
-        <section class="card">
-            <h2 class="section-title">Users</h2>
-            <table>
-                <thead>
-                    <tr><th>Username</th><th>Email</th><th>Role</th><th>Active</th><th></th></tr>
-                </thead>
-                <tbody id="usersBody"></tbody>
-            </table>
-        </section>
+            <nav class="sidebar-nav" aria-label="Admin navigation">
+                <a href="#overview" class="active" data-nav>
+                    <span data-icon="dashboard"></span> Overview
+                </a>
+                <a href="#users" data-nav>
+                    <span data-icon="users"></span> Users
+                </a>
+                <a href="#devices" data-nav>
+                    <span data-icon="devices"></span> Devices
+                </a>
+            </nav>
 
-        <section class="card">
-            <h2 class="section-title">All devices</h2>
-            <table>
-                <thead>
-                    <tr><th>Name</th><th>Type</th><th>State</th><th>Owner</th><th>Room</th></tr>
-                </thead>
-                <tbody id="devicesBody"></tbody>
-            </table>
-        </section>
-    </main>
+            <div class="sidebar-spacer"></div>
+
+            <div class="sidebar-user">
+                <div class="avatar" id="userAvatar">?</div>
+                <div style="min-width:0;flex:1;">
+                    <div class="u-name" id="userName">admin</div>
+                    <div class="u-sub" id="userEmail">—</div>
+                </div>
+            </div>
+            <button id="logoutBtn" class="btn ghost full">
+                <span data-icon="logout" style="width:15px;height:15px;display:inline-block;"></span>
+                Log out
+            </button>
+        </aside>
+
+        <!-- ============ MAIN ============ -->
+        <main class="main-area">
+
+            <div class="topbar-main">
+                <div style="display:flex;align-items:center;gap:14px;">
+                    <button class="hamburger" id="hamburgerBtn" aria-label="Open menu">
+                        <span data-icon="menu" style="width:20px;height:20px;display:block;"></span>
+                    </button>
+                    <div>
+                        <div class="greeting">&gt; admin console, <span class="g-user" id="greetingUser">admin</span></div>
+                        <div class="topbar-clock" id="clock">—</div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="alert" class="error-box hidden" role="alert"></div>
+
+            <!-- Stat row -->
+            <section class="stat-row section-block" id="overview" aria-label="System statistics">
+                <div class="stat accent-cyan">
+                    <div class="stat-value" id="statUsers">0</div>
+                    <div class="stat-label">Total users</div>
+                </div>
+                <div class="stat accent-purple">
+                    <div class="stat-value" id="statDevices">0</div>
+                    <div class="stat-label">Total devices</div>
+                </div>
+                <div class="stat accent-green">
+                    <div class="stat-value" id="statOnline">0</div>
+                    <div class="stat-label">Online / ON</div>
+                </div>
+                <div class="stat accent-pink">
+                    <div class="stat-value" id="statInactive">0</div>
+                    <div class="stat-label">Inactive users</div>
+                </div>
+            </section>
+
+            <!-- Users table -->
+            <section class="section-block" id="users">
+                <div class="section-head">
+                    <div>
+                        <p class="section-label">Access control</p>
+                        <h2>Users</h2>
+                    </div>
+                </div>
+                <div class="table-wrap">
+                    <table class="table">
+                        <thead>
+                            <tr><th>Username</th><th>Email</th><th>Role</th><th>Status</th><th style="width:70px;"></th></tr>
+                        </thead>
+                        <tbody id="usersBody"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Devices table -->
+            <section class="section-block" id="devices">
+                <div class="section-head">
+                    <div>
+                        <p class="section-label">Fleet</p>
+                        <h2>All devices</h2>
+                    </div>
+                </div>
+                <div class="table-wrap">
+                    <table class="table">
+                        <thead>
+                            <tr><th>Name</th><th>Type</th><th>State</th><th>Owner</th><th>Room</th></tr>
+                        </thead>
+                        <tbody id="devicesBody"></tbody>
+                    </table>
+                </div>
+            </section>
+
+        </main>
+    </div>
 
     <script src="/js/auth.js"></script>
-    <script>
-        const alertEl = document.getElementById('alert');
-        document.getElementById('logoutBtn').addEventListener('click', logout);
-
-        function showError(msg) {
-            alertEl.textContent = msg;
-            alertEl.classList.remove('hidden');
-        }
-
-        function el(tag, className, text) {
-            const e = document.createElement(tag);
-            if (className) e.className = className;
-            if (text !== undefined) e.textContent = text;
-            return e;
-        }
-
-        async function guard() {
-            const res = await apiFetch('/api/auth/me');
-            if (!res.ok) { window.location.href = '/login.html'; return false; }
-            const me = await res.json();
-            if (!me.isAdmin) { window.location.href = '/dashboard.html'; return false; }
-            return true;
-        }
-
-        async function loadUsers() {
-            const res = await apiFetch('/api/admin/users');
-            if (!res.ok) { showError(await apiErrorMessage(res, 'Could not load users')); return; }
-            const users = await res.json();
-            const body = document.getElementById('usersBody');
-            body.replaceChildren();
-            users.forEach(u => {
-                const tr = document.createElement('tr');
-                tr.appendChild(el('td', null, u.username));
-                tr.appendChild(el('td', null, u.email));
-                tr.appendChild(el('td', null, u.role));
-                tr.appendChild(el('td', null, u.active ? 'Yes' : 'No'));
-                const actionTd = document.createElement('td');
-                const btn = el('button', 'btn small', u.active ? 'Disable' : 'Enable');
-                btn.addEventListener('click', () => toggleUser(u));
-                actionTd.appendChild(btn);
-                tr.appendChild(actionTd);
-                body.appendChild(tr);
-            });
-        }
-
-        async function toggleUser(u) {
-            const action = u.active ? 'deactivate' : 'activate';
-            const res = await apiFetch('/api/admin/users/' + u.id + '/' + action, { method: 'POST' });
-            if (!res.ok) { showError(await apiErrorMessage(res, 'Could not update user')); return; }
-            loadUsers();
-        }
-
-        async function loadDevices() {
-            const res = await apiFetch('/api/admin/devices');
-            if (!res.ok) { showError(await apiErrorMessage(res, 'Could not load devices')); return; }
-            const devices = await res.json();
-            const body = document.getElementById('devicesBody');
-            body.replaceChildren();
-            devices.forEach(d => {
-                const tr = document.createElement('tr');
-                tr.appendChild(el('td', null, d.name));
-                tr.appendChild(el('td', null, d.type));
-                tr.appendChild(el('td', null, d.state));
-                tr.appendChild(el('td', null, d.ownerEmail));
-                tr.appendChild(el('td', null, d.room || ''));
-                body.appendChild(tr);
-            });
-        }
-
-        (async () => {
-            if (!requireAuth()) return;
-            if (await guard()) {
-                loadUsers();
-                loadDevices();
-            }
-        })();
-    </script>
+    <script src="/js/ui.js"></script>
+    <script src="/js/admin.js"></script>
 </body>
 </html>

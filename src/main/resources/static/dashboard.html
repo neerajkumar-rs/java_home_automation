@@ -4,183 +4,190 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Devices - Home Automation</title>
-    <link rel="stylesheet" href="/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/theme.css">
 </head>
 <body>
-    <header class="topbar">
-        <span class="topbar-title">My Devices</span>
-        <button id="logoutBtn" class="btn small">Log out</button>
-    </header>
+    <div class="app-shell">
 
-    <main class="container">
-        <p id="alert" class="alert error hidden"></p>
+        <!-- ============ SIDEBAR ============ -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-logo">HOME<span class="logo-slash">//</span>AUTO</div>
 
-        <section class="card">
-            <h2 class="section-title">Add device</h2>
-            <form id="addForm" class="row">
-                <input type="text" id="newName" placeholder="Name" required>
-                <select id="newType">
-                    <option value="SWITCH">Switch</option>
-                    <option value="SLIDER">Slider</option>
-                    <option value="RGB">RGB light</option>
-                    <option value="SENSOR">Sensor</option>
-                </select>
-                <input type="text" id="newRoom" placeholder="Room (optional)">
-                <button type="submit" class="btn primary">Add</button>
+            <div class="segmented" id="presenceSwitch" role="group" aria-label="Presence mode">
+                <button type="button" data-mode="home">I'm home</button>
+                <button type="button" data-mode="away">I'm away</button>
+            </div>
+
+            <nav class="sidebar-nav" aria-label="Main navigation">
+                <a href="#dashboard" class="active" data-nav>
+                    <span data-icon="dashboard"></span> Dashboard
+                </a>
+                <a href="#rooms" data-nav>
+                    <span data-icon="rooms"></span> Rooms
+                </a>
+                <a href="#activity" data-nav>
+                    <span data-icon="activity"></span> Activity
+                </a>
+            </nav>
+
+            <div class="sidebar-spacer"></div>
+
+            <div class="sidebar-user">
+                <div class="avatar" id="userAvatar">?</div>
+                <div style="min-width:0;flex:1;">
+                    <div class="u-name" id="userName">user</div>
+                    <div class="u-sub" id="userEmail">—</div>
+                </div>
+            </div>
+            <button id="logoutBtn" class="btn ghost full">
+                <span data-icon="logout" style="width:15px;height:15px;display:inline-block;"></span>
+                Log out
+            </button>
+        </aside>
+
+        <!-- ============ MAIN ============ -->
+        <main class="main-area">
+
+            <!-- Top bar -->
+            <div class="topbar-main">
+                <div style="display:flex;align-items:center;gap:14px;">
+                    <button class="hamburger" id="hamburgerBtn" aria-label="Open menu">
+                        <span data-icon="menu" style="width:20px;height:20px;display:block;"></span>
+                    </button>
+                    <div>
+                        <div class="greeting">&gt; welcome back, <span class="g-user" id="greetingUser">user</span></div>
+                        <div class="topbar-clock" id="clock">—</div>
+                    </div>
+                </div>
+                <div class="search-wrap">
+                    <span data-icon="search"></span>
+                    <input type="text" class="search-input" id="searchInput" placeholder="filter devices..." aria-label="Filter devices">
+                </div>
+            </div>
+
+            <div id="alert" class="error-box hidden" role="alert"></div>
+
+            <!-- Stat row -->
+            <section class="stat-row section-block" id="dashboard" aria-label="Device statistics">
+                <div class="stat accent-cyan">
+                    <div class="stat-value" id="statTotal">0</div>
+                    <div class="stat-label">Total devices</div>
+                </div>
+                <div class="stat accent-green">
+                    <div class="stat-value" id="statOn">0</div>
+                    <div class="stat-label">Devices ON</div>
+                </div>
+                <div class="stat accent-purple">
+                    <div class="stat-value" id="statRooms">0</div>
+                    <div class="stat-label">Rooms</div>
+                </div>
+                <div class="stat accent-pink">
+                    <div class="stat-value" id="statChanges">0</div>
+                    <div class="stat-label">Changes today</div>
+                </div>
+            </section>
+
+            <!-- Device monitor -->
+            <section class="section-block" id="rooms">
+                <div class="section-head">
+                    <div>
+                        <p class="section-label">Device monitor</p>
+                        <h2>All devices</h2>
+                    </div>
+                    <button class="btn primary" id="addDeviceBtn">
+                        <span data-icon="plus" style="width:15px;height:15px;display:inline-block;"></span>
+                        New device
+                    </button>
+                </div>
+
+                <div class="chip-row" id="roomChips" style="margin-bottom:16px;">
+                    <button class="chip active" data-room="all">All</button>
+                </div>
+
+                <div class="device-grid" id="devices"></div>
+                <p id="emptyMsg" class="hidden"></p>
+                <div id="emptyState" class="empty-state hidden">
+                    <span data-icon="box"></span>
+                    <div>
+                        <div style="font-weight:600;color:var(--text);">No devices yet</div>
+                        <div class="empty-hint">&gt; run "new device" to provision your first node_</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Recent activity -->
+            <section class="section-block" id="activity">
+                <p class="section-label">Recent activity</p>
+                <div class="terminal">
+                    <div class="terminal-bar">
+                        <span class="terminal-dot r"></span>
+                        <span class="terminal-dot y"></span>
+                        <span class="terminal-dot g"></span>
+                        <span class="terminal-title">activity.log — tail</span>
+                    </div>
+                    <div class="terminal-body" id="logs">
+                        <div class="terminal-empty cursor" id="logsEmptyLine">&gt; no state changes yet</div>
+                    </div>
+                </div>
+                <p id="logsEmpty" class="hidden">No state changes yet.</p>
+            </section>
+
+            <!-- Gamified strip -->
+            <section class="section-block">
+                <p class="section-label">Your streak</p>
+                <div class="gamify-grid">
+                    <div class="card">
+                        <div class="section-label" style="margin-bottom:12px;">Activity — last 12 weeks</div>
+                        <div class="heatmap" id="heatmap" aria-hidden="true"></div>
+                    </div>
+                    <div class="card">
+                        <div class="section-label" style="margin-bottom:12px;">Achievements</div>
+                        <div class="badges-row" id="badges"></div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- ============ ADD DEVICE MODAL ============ -->
+    <div class="modal-backdrop hidden" id="addModal">
+        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="addModalTitle">
+            <div class="modal-head">
+                <span class="modal-title" id="addModalTitle">&gt; new device</span>
+                <button type="button" class="modal-close" id="addModalClose" aria-label="Close">&times;</button>
+            </div>
+            <form id="addForm">
+                <div class="form-group">
+                    <label for="newName">Device name</label>
+                    <input type="text" id="newName" placeholder="Bedroom lamp" required>
+                </div>
+                <div class="form-group">
+                    <label for="newType">Control type</label>
+                    <select id="newType">
+                        <option value="SWITCH">Switch</option>
+                        <option value="SLIDER">Slider</option>
+                        <option value="RGB">RGB light</option>
+                        <option value="SENSOR">Sensor</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="newRoom">Room (optional)</label>
+                    <input type="text" id="newRoom" placeholder="Living room">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn ghost" id="addModalCancel">Cancel</button>
+                    <button type="submit" class="btn primary">Add device</button>
+                </div>
             </form>
-        </section>
-
-        <section id="devices" class="grid"></section>
-        <p id="emptyMsg" class="muted center hidden">No devices yet. Add one above.</p>
-
-        <section class="card">
-            <h2 class="section-title">Recent activity</h2>
-            <ul id="logs" class="log-list"></ul>
-            <p id="logsEmpty" class="muted hidden">No state changes yet.</p>
-        </section>
-    </main>
+        </div>
+    </div>
 
     <script src="/js/auth.js"></script>
-    <script>
-        const alertEl = document.getElementById('alert');
-        const devicesEl = document.getElementById('devices');
-        const logsEl = document.getElementById('logs');
-        let devices = [];
-
-        document.getElementById('logoutBtn').addEventListener('click', logout);
-
-        function showError(msg) {
-            alertEl.textContent = msg;
-            alertEl.classList.remove('hidden');
-        }
-        function clearError() { alertEl.classList.add('hidden'); }
-
-        function el(tag, className, text) {
-            const e = document.createElement(tag);
-            if (className) e.className = className;
-            if (text !== undefined) e.textContent = text;
-            return e;
-        }
-
-        async function loadDevices() {
-            const res = await apiFetch('/api/devices');
-            if (!res.ok) { showError(await apiErrorMessage(res, 'Could not load devices')); return; }
-            devices = await res.json();
-            renderDevices();
-            loadLogs();
-        }
-
-        function renderDevices() {
-            devicesEl.replaceChildren();
-            document.getElementById('emptyMsg').classList.toggle('hidden', devices.length > 0);
-            devices.forEach(d => devicesEl.appendChild(renderDevice(d)));
-        }
-
-        function renderDevice(d) {
-            const card = el('div', 'card device-card');
-
-            const head = el('div', 'row space-between');
-            head.appendChild(el('strong', null, d.name));
-            head.appendChild(el('span', 'badge ' + (d.state === 'ON' ? 'on' : 'off'), d.state));
-            card.appendChild(head);
-
-            card.appendChild(el('p', 'muted', (d.type || '') + (d.room ? ' · ' + d.room : '')));
-
-            const controls = el('div', 'controls');
-
-            const toggleBtn = el('button', 'btn small', d.state === 'ON' ? 'Turn off' : 'Turn on');
-            toggleBtn.addEventListener('click', () => setState(d, d.state === 'ON' ? 'OFF' : 'ON'));
-            controls.appendChild(toggleBtn);
-
-            if (d.type === 'SLIDER' || d.type === 'RGB') {
-                const slider = el('input');
-                slider.type = 'range'; slider.min = 0; slider.max = 100; slider.value = d.value;
-                slider.addEventListener('change', () => setState(d, d.state, Number(slider.value)));
-                controls.appendChild(slider);
-            }
-
-            if (d.type === 'RGB') {
-                const color = el('input');
-                color.type = 'color';
-                color.value = rgbToHex(d.red, d.green, d.blue);
-                color.addEventListener('change', () => setColor(d, color.value));
-                controls.appendChild(color);
-            }
-
-            const delBtn = el('button', 'btn small danger', 'Delete');
-            delBtn.addEventListener('click', () => removeDevice(d));
-            controls.appendChild(delBtn);
-
-            card.appendChild(controls);
-            return card;
-        }
-
-        function rgbToHex(r, g, b) {
-            const h = n => Number(n).toString(16).padStart(2, '0');
-            return '#' + h(r) + h(g) + h(b);
-        }
-
-        async function setState(d, state, value) {
-            clearError();
-            const body = { state };
-            if (value !== undefined) body.value = value;
-            const res = await apiFetch('/api/devices/' + d.id + '/state', { method: 'POST', body: JSON.stringify(body) });
-            if (!res.ok) { showError(await apiErrorMessage(res, 'State change failed')); return; }
-            loadDevices();
-        }
-
-        async function setColor(d, hex) {
-            clearError();
-            const body = {
-                red: parseInt(hex.slice(1, 3), 16),
-                green: parseInt(hex.slice(3, 5), 16),
-                blue: parseInt(hex.slice(5, 7), 16)
-            };
-            const res = await apiFetch('/api/devices/' + d.id + '/color', { method: 'POST', body: JSON.stringify(body) });
-            if (!res.ok) { showError(await apiErrorMessage(res, 'Color change failed')); return; }
-            loadDevices();
-        }
-
-        async function removeDevice(d) {
-            if (!confirm('Delete "' + d.name + '"?')) return;
-            clearError();
-            const res = await apiFetch('/api/devices/' + d.id, { method: 'DELETE' });
-            if (!res.ok) { showError(await apiErrorMessage(res, 'Delete failed')); return; }
-            loadDevices();
-        }
-
-        async function loadLogs() {
-            logsEl.replaceChildren();
-            if (devices.length === 0) { document.getElementById('logsEmpty').classList.remove('hidden'); return; }
-            const res = await apiFetch('/api/devices/' + devices[0].id + '/logs');
-            if (!res.ok) { return; }
-            const logs = await res.json();
-            document.getElementById('logsEmpty').classList.toggle('hidden', logs.length > 0);
-            logs.slice(0, 10).forEach(l => {
-                const item = el('li', null,
-                    (l.previousState ?? '?') + ' → ' + l.newState +
-                    (l.newValue ? ' (' + l.previousValue + ' → ' + l.newValue + ')' : '') +
-                    ' · ' + (l.triggeredBy ?? '') + ' · ' + (l.changeReason ?? ''));
-                logsEl.appendChild(item);
-            });
-        }
-
-        document.getElementById('addForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            clearError();
-            const body = {
-                name: document.getElementById('newName').value.trim(),
-                type: document.getElementById('newType').value,
-                room: document.getElementById('newRoom').value.trim() || null
-            };
-            const res = await apiFetch('/api/devices', { method: 'POST', body: JSON.stringify(body) });
-            if (!res.ok) { showError(await apiErrorMessage(res, 'Could not add device')); return; }
-            document.getElementById('newName').value = '';
-            document.getElementById('newRoom').value = '';
-            loadDevices();
-        });
-
-        if (requireAuth()) loadDevices();
-    </script>
+    <script src="/js/ui.js"></script>
+    <script src="/js/dashboard.js"></script>
 </body>
 </html>

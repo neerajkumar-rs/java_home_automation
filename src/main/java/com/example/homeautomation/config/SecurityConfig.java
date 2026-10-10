@@ -55,7 +55,7 @@ public class SecurityConfig {
                 // Public endpoints
                 .requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/auth/register").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/auth/validate").permitAll()
-                .requestMatchers("/", "/index.html", "/login.html", "/register.html", "/app.js", "/js/**", "/styles.css", "/favicon.ico").permitAll()
+                .requestMatchers("/", "/index.html", "/login.html", "/register.html", "/app.js", "/js/**", "/styles.css", "/theme.css", "/favicon.ico").permitAll()
                 .requestMatchers("/static/**").permitAll()
 
                 // Admin endpoints - admin only
